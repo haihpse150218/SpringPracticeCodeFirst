@@ -1,18 +1,31 @@
 package com.haihpse150218.practicecodefirst.models;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.Calendar;
+import java.util.Objects;
 
 
 // POJO = Plain Object Java Object
 @Entity
+@Table(name = "tblProduct")
 public class Product {
     //set primarykey
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    //@GeneratedValue(strategy = GenerationType.AUTO)
+    //using sequence
+    @SequenceGenerator(
+            name = "product_sequence",
+            sequenceName = "product_sequence",
+            allocationSize = 1 //increment by 1
+
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "product_sequence"
+    )
     private long pId;
+    //validate
+    @Column(nullable = false, unique = true, length = 300)
     private String productName;
     private int pYear;
     private Double price;
@@ -20,6 +33,17 @@ public class Product {
     //default constructor
 
     public Product() {
+    }
+    //caculated field = transient
+    @Transient
+    private int age;
+
+    public int getAge() {
+        return Calendar.getInstance().get(Calendar.YEAR) - pYear;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
     }
 
     public Product(String productName, int year, Double price, String url) {
@@ -79,5 +103,22 @@ public class Product {
                 ", price=" + price +
                 ", url='" + url + '\'' +
                 '}';
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return pId == product.pId
+                && pYear == product.pYear
+                && age == product.age
+                && Objects.equals(productName, product.productName)
+                && Objects.equals(price, product.price)
+                && Objects.equals(url, product.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pId, productName, pYear, price, url, age);
     }
 }
